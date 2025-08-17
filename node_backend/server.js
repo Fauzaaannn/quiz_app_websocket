@@ -162,37 +162,42 @@ app.post("/select-role", async (req, res) => {
   const { access_token, selected_role } = req.body;
 
   if (!access_token || !selected_role) {
-    return res.status(400).json({ message: "Missing token or role" });
+    return res
+      .status(400)
+      .json({ message: "access_token and selected_role required" });
   }
 
   try {
-    // Verifikasi token dengan ambil user info
-    const userInfoRes = await axios.get(
+    // Ambil userinfo dari Keycloak berdasarkan access_token
+    const userinfoRes = await axios.get(
       `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/userinfo`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${access_token}` } }
     );
+    const ui = userinfoRes.data || {};
+    const sub = ui.sub;
+    if (!sub) return res.status(401).json({ message: "invalid token" });
 
-    const user = userInfoRes.data;
-    const userId = user.sub;
+    const displayName = ui.name || ui.preferred_username || ui.email || sub;
 
-    // Simpan role untuk user
-    userRoles[userId] = selected_role;
+    // Simpan role yang dipilih
+    userRoles[sub] = selected_role;
 
-    res.json({
-      message: `Role '${selected_role}' saved for user '${user.preferred_username}'`,
-      user,
-      selected_role,
+    return res.json({
+      message: `Role "${selected_role}" set for ${displayName}`,
+      user: {
+        id: sub,
+        name: displayName,
+        email: ui.email ?? null,
+        preferred_username: ui.preferred_username ?? null,
+      },
+      role: selected_role,
     });
   } catch (error) {
     console.error(
-      "Error verifying token or saving role:",
-      error.response?.data || error.message
+      "select-role failed",
+      error?.response?.data || error?.message
     );
-    res.status(401).json({ message: "Invalid access token" });
+    return res.status(500).json({ message: "failed to set role" });
   }
 });
 
@@ -357,7 +362,6 @@ app.get("/success", (req, res) => {
 });
 
 // Initialize WebSocket for quiz functionality
-
 
 // Quiz REST routes (dosen & mahasiswa)
 app.use("/api", buildQuizRouter(bus));

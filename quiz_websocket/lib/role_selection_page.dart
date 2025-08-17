@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:quiz_websocket/quiz_page.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_page.dart';
@@ -16,18 +17,31 @@ class RoleSelectionPage extends StatelessWidget {
     );
 
     if (response.statusCode == 200) {
-      // Show backend message (includes username) when available
       String msg = 'Role "$role" selected!';
+      String? userName;
       try {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        if (data['message'] is String) {
-          msg = data['message'] as String;
-        }
+        if (data['message'] is String) msg = data['message'] as String;
+        final user = data['user'] as Map<String, dynamic>?;
+        userName =
+            (user?['name'] ?? user?['preferred_username'] ?? user?['email'])
+                ?.toString();
       } catch (_) {}
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-      // TODO: Navigate to home (based on role)
+
+      // Navigate ke QuizPage, kirim nama & role
+      if (context.mounted && role == 'mahasiswa') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => QuizPage(),
+            settings: RouteSettings(
+              arguments: {'userName': userName, 'role': role},
+            ),
+          ),
+        );
+      }
     } else {
-      // Try to read server error message
       String err = 'Failed to select role';
       try {
         final data = jsonDecode(response.body) as Map<String, dynamic>;

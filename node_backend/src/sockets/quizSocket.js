@@ -37,6 +37,7 @@ function setupQuizWebSocket(server) {
           correct: isCorrect ? 1 : 0,
           incorrect: isCorrect ? 0 : 1,
         });
+        // mengirimkan update skor ke semua klien
       }
     });
   });
