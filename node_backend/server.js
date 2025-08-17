@@ -1,12 +1,17 @@
 require("dotenv").config();
 const express = require("express");
+const http = require("http");
 const axios = require("axios");
 const querystring = require("querystring");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const { setupQuizWebSocket } = require("./src/sockets/quizSocket");
+const { buildQuizRouter } = require("./src/routes/quizRoutes");
 
 const app = express();
-app.use(cors());
+const server = http.createServer(app);
+const bus = setupQuizWebSocket(server);
+app.use(cors({ origin: /http:\/\/localhost:\d+/, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -351,8 +356,15 @@ app.get("/success", (req, res) => {
   </html>`);
 });
 
+// Initialize WebSocket for quiz functionality
+
+
+// Quiz REST routes (dosen & mahasiswa)
+app.use("/api", buildQuizRouter(bus));
+
 // Start Server
-const PORT = 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+server.listen(PORT, () => {
   console.log(`BFF server running at http://localhost:${PORT}`);
+  console.log(`WebSocket endpoint at ws://localhost:${PORT}/ws`);
 });

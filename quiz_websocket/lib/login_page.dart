@@ -24,8 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleUri(Uri? uri) {
-    if (uri != null && uri.scheme == 'com.yourapp') {
-      final token = uri.queryParameters['access_token'];
+    if (uri != null && uri.scheme == 'com.yourapp') { // Cek skema URI
+      final token = uri.queryParameters['access_token']; // Ambil token dari parameter query
       setState(() {
         _accessToken = token;
       });
@@ -47,12 +47,12 @@ class _LoginPageState extends State<LoginPage> {
     _sub = _appLinks.uriLinkStream.listen(_handleUri);
   }
 
-  void _launchSSOLogin() async {
+  void _launchSSOLogin() async { // Meluncurkan proses login SSO
     const loginUrl = 'http://localhost:3000/login'; // Ganti jika backend online
-    if (await canLaunchUrl(Uri.parse(loginUrl))) {
-      await launchUrl(
-        Uri.parse(loginUrl),
-        mode: LaunchMode.externalApplication,
+    if (await canLaunchUrl(Uri.parse(loginUrl))) { // Cek ketersediaan URL
+      await launchUrl( // Buka URL di browser eksternal
+        Uri.parse(loginUrl), // URL login SSO
+        mode: LaunchMode.externalApplication, // Buka di aplikasi eksternal
       );
     } else {
       throw 'Could not launch SSO login';
