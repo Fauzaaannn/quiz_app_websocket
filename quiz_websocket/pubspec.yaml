@@ -29,9 +29,12 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   app_links: ^6.4.0
+  bloc: ^9.0.0
   cupertino_icons: ^1.0.8
+  equatable: ^2.0.7
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
   http: ^1.5.0
   url_launcher: ^6.3.2
   web_socket_channel: ^3.0.3

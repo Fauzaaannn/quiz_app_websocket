@@ -17,7 +17,7 @@ class _QuizPageState extends State<QuizPage> {
   // Tambahan: tracking pertanyaan terjawab dan pending hide
   final Set<String> _answeredIds = {};
   final Set<String> _pendingHide = {};
-  final int _hideDelayMs = 1500; // atur delay dalam millisecond
+  final int _hideDelayMs = 500; // atur delay dalam millisecond
 
   @override
   void initState() {
